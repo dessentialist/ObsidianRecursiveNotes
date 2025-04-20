@@ -1,6 +1,6 @@
 # Obsidian Recursive Notes Exporter
 
-A powerful tool to export Obsidian notes and their linked files, preserving the network of connections while optionally converting to HTML.
+A powerful tool to export Obsidian notes and their linked files, preserving the network of connections.
 
 ![License](https://img.shields.io/github/license/darpan/obsidian-recursive-notes)
 ![Python Version](https://img.shields.io/badge/python-3.6%2B-blue)
@@ -9,7 +9,6 @@ A powerful tool to export Obsidian notes and their linked files, preserving the 
 
 - **Recursive Export**: Automatically finds and exports all linked Markdown files and images
 - **Customizable Depth**: Control how deeply to follow nested links (from just the main file to unlimited depth)
-- **HTML Conversion**: Export to HTML with proper navigation and a file tree sidebar
 - **Circular Reference Handling**: Intelligently handles circular references between files
 - **Easy GUI Interface**: Simple graphical interface for those who prefer not to use the command line
 - **Accurate File Counts**: Shows you exactly how many files will be exported
@@ -41,7 +40,7 @@ A powerful tool to export Obsidian notes and their linked files, preserving the 
 The simplest way to use the exporter is through its graphical interface:
 
 ```
-python gui_interface.py
+python run.py
 ```
 
 This will open a file selection dialog, followed by export options.
@@ -51,29 +50,28 @@ This will open a file selection dialog, followed by export options.
 For advanced users or automation, you can use the command line interface:
 
 ```
-python main.py path/to/your/file.md [Y/N] [depth]
+python -m obsidian_recursive_notes.main path/to/your/file.md [depth]
 ```
 
 Arguments:
 - `path/to/your/file.md`: The path to the Markdown file to export
-- `Y/N`: Whether to export to HTML (Y) or just copy Markdown files (N)
 - `depth`: (Optional) Maximum recursion depth (integer or leave blank for unlimited)
 
 ### Examples
 
-1. Export a file with all linked files, converting to HTML:
+1. Export a file with all linked files:
    ```
-   python main.py my_notes.md Y
-   ```
-
-2. Export only the specified file and directly linked files (depth 1), without HTML conversion:
-   ```
-   python main.py my_notes.md N 1
+   python -m obsidian_recursive_notes.main my_notes.md
    ```
 
-3. Export a file with linked files up to 3 levels deep, with HTML conversion:
+2. Export only the specified file and directly linked files (depth 1):
    ```
-   python main.py my_notes.md Y 3
+   python -m obsidian_recursive_notes.main my_notes.md 1
+   ```
+
+3. Export a file with linked files up to 3 levels deep:
+   ```
+   python -m obsidian_recursive_notes.main my_notes.md 3
    ```
 
 ## Output Structure
@@ -82,11 +80,8 @@ The exported files are organized in a clean structure:
 
 ```
 export/
-├── index.html              # Main entry point for HTML exports
-├── treeview.html           # File tree navigation sidebar
 └── notes/                  # All exported Markdown and image files
     ├── your_file.md        # Your original Markdown file
-    ├── your_file.md.html   # HTML version (if HTML export enabled)
     ├── linked_file.md      # Files linked from your original file
     └── images/             # All referenced images
 ```
