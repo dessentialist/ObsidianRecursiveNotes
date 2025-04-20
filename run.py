@@ -12,7 +12,7 @@ from obsidian_recursive_notes.gui_interface import main as gui_main
 def main():
     """Launch the GUI interface."""
     print("Starting Obsidian Recursive Notes Exporter...")
-    gui_main(markdown_only=True)
+    gui_main()
 
 if __name__ == "__main__":
     main()

@@ -231,8 +231,7 @@ def run_export(file_path, max_depth=None):
     print(f"Starting file processing with max_depth={max_depth}...")
     read_files_recursive(
         file_to_export, 
-        max_depth=max_depth, 
-        export_to_html=False, 
+        max_depth=max_depth,
         export_dir=export_dir, 
         files_already_copied=files_copied
     )
@@ -274,12 +273,9 @@ def run_export(file_path, max_depth=None):
     return True
 
 
-def main(markdown_only=False):
+def main():
     """
     Main entry point for the GUI interface.
-    
-    Args:
-        markdown_only (bool): If True, only export markdown files without HTML conversion
     """
     # Select a file
     file_path = select_file()
@@ -290,7 +286,7 @@ def main(markdown_only=False):
     # Get recursion depth
     max_depth = get_max_depth()
     
-    # Run the export with markdown only
+    # Run the export
     run_export(file_path, max_depth)
 
 

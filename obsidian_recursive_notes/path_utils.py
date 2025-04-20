@@ -2,7 +2,7 @@
 Path Utilities Module
 
 This module provides utilities for handling file paths in the Markdown export process.
-Functions include string conversion, sanitization, and relative path calculation.
+Functions include string conversion, sanitization, and file search.
 """
 
 import os
@@ -38,27 +38,6 @@ def sanitize_filename(filename):
     # Remove special characters except for .-_
     sanitized = re.sub(r'[^a-zA-Z0-9._-]', '_', filename)
     return sanitized
-
-
-def find_rel_path(link_path, current_file):
-    """
-    Get the relative path for HTML links.
-    
-    Args:
-        link_path (str): Path to the linked file
-        current_file (str): Path to the current file
-        
-    Returns:
-        str: Relative path suitable for HTML links
-    """
-    # We're always placing files in the notes directory with a flattened structure
-    # So we just need the basename
-    basename = os.path.basename(link_path)
-    sanitized_name = sanitize_filename(basename)
-    
-    # HTML links are always relative to the notes directory
-    rel_path = os.path.join("notes", sanitized_name)
-    return rel_path
 
 
 def find_file_in_directory(filename, base_directory):

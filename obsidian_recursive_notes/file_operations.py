@@ -82,7 +82,6 @@ def copy_file_to_export(file_to_find, current_file, traverse=False, export_dir=N
                 read_files_recursive(
                     linked_file_path, 
                     max_depth=next_depth, 
-                    export_to_html=False, 
                     export_dir=export_dir, 
                     files_already_copied=files_already_copied
                 )
@@ -196,14 +195,13 @@ def find_image_links(line, current_file, export_dir=None, files_already_copied=N
     return (line, assets_count)
 
 
-def read_files_recursive(path, max_depth=None, export_to_html=False, export_dir=None, files_already_copied=None):
+def read_files_recursive(path, max_depth=None, export_dir=None, files_already_copied=None):
     """
     Recursively read and process markdown files, copying them to the export directory.
     
     Args:
         path (str): Path to the markdown file to process
         max_depth (int, optional): Maximum recursion depth. Defaults to None.
-        export_to_html (bool, optional): Whether to convert to HTML. Defaults to False.
         export_dir (str, optional): Export directory path. Defaults to None.
         files_already_copied (list, optional): List of already copied files. Defaults to None.
     """
@@ -233,7 +231,7 @@ def read_files_recursive(path, max_depth=None, export_to_html=False, export_dir=
     
     assets_count = 0
     
-    # Process links without converting to HTML
+    # Process links
     for line in data:
         find_markdown_links(
             line, 
