@@ -1,0 +1,9 @@
+#!/usr/bin/env python3
+"""
+GUI entry point for Obsidian Recursive Notes Exporter
+"""
+
+from obsidian_recursive_notes.gui_interface import main
+
+if __name__ == "__main__":
+    main() 

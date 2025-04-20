@@ -1,0 +1,12 @@
+# This project uses only standard library modules
+# No additional packages are required for core functionality
+# Note: Tkinter is included in the standard library, but on some
+# Linux distributions it may need to be installed separately (e.g. python3-tk)
+
+# Core dependencies
+# The project mainly uses standard library, but we list Python version for clarity
+# Minimum Python version: 3.6
+
+# Testing dependencies
+pytest>=7.0.0
+pytest-cov>=4.1.0 
