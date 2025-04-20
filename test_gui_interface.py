@@ -4,20 +4,26 @@ import sys
 from unittest.mock import patch, MagicMock
 
 # Import the module to be tested
-# (We'll create this after writing the tests)
 try:
-    from gui_interface import select_file, get_export_options, run_export
+    from obsidian_recursive_notes.gui_interface import select_file, run_export, get_max_depth
 except ImportError:
-    pass  # Will be created after the tests
+    # Import fallback for running tests directly
+    try:
+        from obsidian_recursive_notes.gui_interface import select_file, run_export, get_max_depth
+    except ImportError:
+        pass  # Will be mocked in tests
 
 
 class TestGUIInterface(unittest.TestCase):
     """Tests for the GUI interface for the Markdown exporter."""
 
-    @patch('gui_interface.filedialog.askopenfilename')
-    def test_select_file(self, mock_askopenfilename):
+    @patch('obsidian_recursive_notes.gui_interface.create_hidden_root')
+    @patch('tkinter.filedialog.askopenfilename')
+    def test_select_file(self, mock_askopenfilename, mock_create_root):
         """Test that the file selection dialog returns the selected file path."""
         # Set up the mock to return a specific file path
+        mock_root = MagicMock()
+        mock_create_root.return_value = mock_root
         expected_path = "/path/to/test.md"
         mock_askopenfilename.return_value = expected_path
 
@@ -33,47 +39,47 @@ class TestGUIInterface(unittest.TestCase):
         actual_path = select_file()
         self.assertIsNone(actual_path)
 
-    @patch('gui_interface.simpledialog.askinteger')
-    @patch('gui_interface.messagebox.askyesno')
-    def test_get_export_options(self, mock_askyesno, mock_askinteger):
-        """Test that the export options dialog returns the correct values."""
-        # Set up mocks
-        mock_askyesno.return_value = True
+    @patch('obsidian_recursive_notes.gui_interface.create_hidden_root')
+    @patch('tkinter.simpledialog.askinteger')
+    def test_get_max_depth(self, mock_askinteger, mock_create_root):
+        """Test that the max depth dialog returns the correct value."""
+        # Set up mock
+        mock_root = MagicMock()
+        mock_create_root.return_value = mock_root
         mock_askinteger.return_value = 2
 
         # Call the function
-        export_to_html, max_depth = get_export_options()
+        max_depth = get_max_depth()
 
-        # Check the results
-        self.assertTrue(export_to_html)
+        # Check the result
         self.assertEqual(max_depth, 2)
 
-        # Test with different values
-        mock_askyesno.return_value = False
-        mock_askinteger.return_value = None  # User cancelled
-        
-        export_to_html, max_depth = get_export_options()
-        
-        self.assertFalse(export_to_html)
+        # Test with user cancellation
+        mock_askinteger.return_value = None
+        max_depth = get_max_depth()
         self.assertIsNone(max_depth)
 
-    @patch('gui_interface.read_files_recursive')
-    @patch('gui_interface.create_export_dir')
-    @patch('gui_interface.resolve_path')
-    @patch('gui_interface.ensure_str_path')
-    @patch('gui_interface.generate_treeview_html')
-    @patch('gui_interface.os.path.exists')
-    @patch('gui_interface.os.path.isdir')
-    @patch('gui_interface.shutil.rmtree')
-    @patch('gui_interface.os.makedirs')
-    @patch('gui_interface.shutil.copyfile')
-    @patch('gui_interface.open')
-    def test_run_export(self, mock_open, mock_copyfile, mock_makedirs, mock_rmtree, 
-                        mock_isdir, mock_exists, mock_generate_treeview, 
-                        mock_ensure_str_path, mock_resolve_path, mock_create_export_dir,
-                        mock_read_files_recursive):
+    @patch('obsidian_recursive_notes.gui_interface.read_files_recursive')
+    @patch('obsidian_recursive_notes.gui_interface.create_export_dir')
+    @patch('obsidian_recursive_notes.gui_interface.resolve_path')
+    @patch('obsidian_recursive_notes.gui_interface.ensure_str_path')
+    @patch('obsidian_recursive_notes.gui_interface.os.path.exists')
+    @patch('obsidian_recursive_notes.gui_interface.os.path.isdir')
+    @patch('obsidian_recursive_notes.gui_interface.shutil.rmtree')
+    @patch('obsidian_recursive_notes.gui_interface.os.makedirs')
+    @patch('obsidian_recursive_notes.gui_interface.shutil.copyfile')
+    @patch('obsidian_recursive_notes.gui_interface.count_expected_links')
+    @patch('obsidian_recursive_notes.gui_interface.create_hidden_root')
+    @patch('tkinter.messagebox.showinfo')
+    @patch('tkinter.messagebox.showerror')
+    def test_run_export(self, mock_showerror, mock_showinfo, mock_create_root, mock_count_links, 
+                       mock_copyfile, mock_makedirs, mock_rmtree, mock_isdir, 
+                       mock_exists, mock_ensure_str_path, mock_resolve_path, 
+                       mock_create_export_dir, mock_read_files_recursive):
         """Test that the run_export function calls the correct functions with the right arguments."""
         # Set up mocks
+        mock_root = MagicMock()
+        mock_create_root.return_value = mock_root
         file_path = "/path/to/test.md"
         resolved_path = "/resolved/path/to/test.md"
         export_dir = "/export/dir"
@@ -83,13 +89,10 @@ class TestGUIInterface(unittest.TestCase):
         mock_exists.return_value = True
         mock_isdir.return_value = True
         mock_ensure_str_path.return_value = resolved_path
-        
-        # Mock the file open
-        mock_file = MagicMock()
-        mock_open.return_value.__enter__.return_value = mock_file
+        mock_count_links.return_value = (5, set())
         
         # Call the function
-        result = run_export(file_path, export_to_html=True, max_depth=2)
+        result = run_export(file_path, max_depth=2)
         
         # Check the results
         self.assertTrue(result)
@@ -99,7 +102,7 @@ class TestGUIInterface(unittest.TestCase):
         
         # Test when resolve_path returns an error
         mock_resolve_path.return_value = (None, "Error: File not found")
-        result = run_export(file_path, export_to_html=True, max_depth=2)
+        result = run_export(file_path, max_depth=2)
         self.assertFalse(result)
 
 

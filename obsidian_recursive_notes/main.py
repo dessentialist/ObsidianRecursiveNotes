@@ -25,9 +25,9 @@ import os
 import sys
 import shutil
 
-from path_utils import ensure_str_path, create_export_dir, resolve_path
-from file_operations import read_files_recursive, generate_treeview_html
-import html_converter
+from .path_utils import ensure_str_path, create_export_dir, resolve_path
+from .file_operations import read_files_recursive, generate_treeview_html
+from . import html_converter
 
 
 def print_usage():

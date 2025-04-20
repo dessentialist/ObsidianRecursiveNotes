@@ -12,9 +12,20 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
 
 # Import from our modules
-from path_utils import ensure_str_path, create_export_dir, resolve_path
-from file_operations import read_files_recursive, generate_treeview_html
-import html_converter
+from .path_utils import ensure_str_path, create_export_dir, resolve_path, find_file_in_directory
+from .file_operations import read_files_recursive
+
+
+def create_hidden_root():
+    """
+    Create and return a hidden Tkinter root window.
+    
+    Returns:
+        tk.Tk: A hidden root window
+    """
+    root = tk.Tk()
+    root.withdraw()
+    return root
 
 
 def select_file():
@@ -24,9 +35,7 @@ def select_file():
     Returns:
         str or None: Path to the selected file, or None if cancelled
     """
-    # Create a root window but keep it hidden
-    root = tk.Tk()
-    root.withdraw()
+    root = create_hidden_root()
     
     # Show the file dialog
     file_path = filedialog.askopenfilename(
@@ -41,24 +50,14 @@ def select_file():
     return file_path if file_path else None
 
 
-def get_export_options():
+def get_max_depth():
     """
-    Show dialog boxes to get export options from the user.
+    Show dialog box to get recursion depth from the user.
     
     Returns:
-        tuple: (export_to_html, max_depth)
-            export_to_html (bool): Whether to export to HTML
-            max_depth (int or None): Maximum recursion depth or None for unlimited
+        int or None: Maximum recursion depth or None for unlimited
     """
-    # Create a root window but keep it hidden
-    root = tk.Tk()
-    root.withdraw()
-    
-    # Ask about HTML export
-    export_to_html = messagebox.askyesno(
-        title="Export to HTML",
-        message="Do you want to export to HTML?\n\nYes: Generate HTML files\nNo: Copy markdown files only"
-    )
+    root = create_hidden_root()
     
     # Ask about recursion depth
     max_depth = simpledialog.askinteger(
@@ -73,7 +72,7 @@ def get_export_options():
     # Clean up the root window
     root.destroy()
     
-    return export_to_html, max_depth
+    return max_depth
 
 
 def count_expected_links(file_path, visited=None, current_depth=0, max_depth=None):
@@ -138,22 +137,9 @@ def count_expected_links(file_path, visited=None, current_depth=0, max_depth=Non
                 # Get absolute path to the linked file
                 original_dir = os.path.dirname(os.path.abspath(file_path))
                 
-                # Try to find the file in the same directory first
-                linked_file_path = os.path.join(original_dir, file_only)
-                linked_file_path = os.path.normpath(linked_file_path)
-                file_found = os.path.exists(linked_file_path)
-                
-                # If not found in the same directory, search recursively
-                if not file_found:
-                    for root, _, files in os.walk(original_dir):
-                        for file in files:
-                            if file == file_only:
-                                linked_file_path = os.path.join(root, file)
-                                linked_file_path = os.path.normpath(linked_file_path)
-                                file_found = True
-                                break
-                        if file_found:
-                            break
+                # Find the file using our helper function
+                linked_file_path = find_file_in_directory(file_only, original_dir)
+                file_found = linked_file_path is not None
                 
                 # Check if file exists and hasn't been visited yet
                 if file_found and linked_file_path not in visited:
@@ -176,22 +162,9 @@ def count_expected_links(file_path, visited=None, current_depth=0, max_depth=Non
                     
                 original_dir = os.path.dirname(os.path.abspath(file_path))
                 
-                # Try to find the file in the same directory first
-                linked_file_path = os.path.join(original_dir, file_only)
-                linked_file_path = os.path.normpath(linked_file_path)
-                file_found = os.path.exists(linked_file_path)
-                
-                # If not found in the same directory, search recursively
-                if not file_found:
-                    for root, _, files in os.walk(original_dir):
-                        for file in files:
-                            if file == file_only:
-                                linked_file_path = os.path.join(root, file)
-                                linked_file_path = os.path.normpath(linked_file_path)
-                                file_found = True
-                                break
-                        if file_found:
-                            break
+                # Find the file using our helper function
+                linked_file_path = find_file_in_directory(file_only, original_dir)
+                file_found = linked_file_path is not None
                 
                 # Check if file exists and hasn't been visited yet
                 if file_found and linked_file_path not in visited:
@@ -203,13 +176,12 @@ def count_expected_links(file_path, visited=None, current_depth=0, max_depth=Non
     return count, visited
 
 
-def run_export(file_path, export_to_html=True, max_depth=None):
+def run_export(file_path, max_depth=None):
     """
     Run the export process with the given options.
     
     Args:
         file_path (str): Path to the Markdown file to export
-        export_to_html (bool, optional): Whether to export to HTML. Defaults to True.
         max_depth (int, optional): Maximum recursion depth. Defaults to None (unlimited).
         
     Returns:
@@ -220,8 +192,7 @@ def run_export(file_path, export_to_html=True, max_depth=None):
     
     if error:
         # Show error message
-        root = tk.Tk()
-        root.withdraw()
+        root = create_hidden_root()
         messagebox.showerror("Error", error)
         root.destroy()
         return False
@@ -236,8 +207,7 @@ def run_export(file_path, export_to_html=True, max_depth=None):
     export_dir = create_export_dir(file_path)
     
     # Show info about export location
-    root = tk.Tk()
-    root.withdraw()
+    root = create_hidden_root()
     messagebox.showinfo(
         "Export Location",
         f"Files will be exported to:\n{export_dir}\nExpected file count: {expected_count}"
@@ -262,22 +232,13 @@ def run_export(file_path, export_to_html=True, max_depth=None):
     read_files_recursive(
         file_to_export, 
         max_depth=max_depth, 
-        export_to_html=export_to_html, 
+        export_to_html=False, 
         export_dir=export_dir, 
         files_already_copied=files_copied
     )
     
     print(f"Completed file processing. Files copied: {len(files_copied)}")
     print(f"Files copied: {[os.path.basename(f) for f in files_copied]}")
-
-    # Generate HTML index and treeview if exporting to HTML
-    if export_to_html:
-        # Generate index.html
-        with open(os.path.join(export_dir, "index.html"), 'w') as output_file:
-            output_file.write(html_converter.generate_index_html(file_to_export))
-        
-        # Generate treeview.html
-        generate_treeview_html(files_copied, export_dir)
     
     # Compare expected vs actual file count
     actual_count = len(files_copied)
@@ -288,14 +249,13 @@ def run_export(file_path, export_to_html=True, max_depth=None):
     other_files = actual_count - md_files - image_files
     
     completion_message = (
-        f"Files have been exported to:\n{export_dir}" + 
-        (f"/index.html" if export_to_html else '') +
-        f"\n\nFile Count Summary:\n" +
-        f"Expected: {expected_count}\n" +
-        f"Actual: {actual_count}\n\n" +
-        f"Breakdown:\n" +
-        f"Markdown files: {md_files}\n" +
-        f"Image files: {image_files}\n" +
+        f"Files have been exported to:\n{export_dir}\n\n"
+        f"File Count Summary:\n"
+        f"Expected: {expected_count}\n"
+        f"Actual: {actual_count}\n\n"
+        f"Breakdown:\n"
+        f"Markdown files: {md_files}\n"
+        f"Image files: {image_files}\n"
         f"Other files: {other_files}"
     )
     
@@ -307,27 +267,31 @@ def run_export(file_path, export_to_html=True, max_depth=None):
         completion_message += "\n\n✓ All expected files were copied successfully!"
     
     # Show completion message
-    root = tk.Tk()
-    root.withdraw()
+    root = create_hidden_root()
     messagebox.showinfo("Export Complete", completion_message)
     root.destroy()
     
     return True
 
 
-def main():
-    """Main entry point for the GUI interface."""
+def main(markdown_only=False):
+    """
+    Main entry point for the GUI interface.
+    
+    Args:
+        markdown_only (bool): If True, only export markdown files without HTML conversion
+    """
     # Select a file
     file_path = select_file()
     if not file_path:
         print("No file selected. Exiting.")
         return
     
-    # Get export options
-    export_to_html, max_depth = get_export_options()
+    # Get recursion depth
+    max_depth = get_max_depth()
     
-    # Run the export
-    run_export(file_path, export_to_html, max_depth)
+    # Run the export with markdown only
+    run_export(file_path, max_depth)
 
 
 if __name__ == "__main__":

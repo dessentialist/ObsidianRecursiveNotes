@@ -37,7 +37,7 @@ fi
 
 # Run the GUI interface
 echo "Starting Obsidian Recursive Notes Exporter..."
-$PYTHON gui_interface.py
+$PYTHON run.py
 
 # Exit with the same code as the Python script
 exit $? 

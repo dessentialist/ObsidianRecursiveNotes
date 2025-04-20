@@ -27,36 +27,67 @@ def ensure_str_path(path):
 
 def sanitize_filename(filename):
     """
-    Convert a filename to a safe format by removing problematic characters.
+    Convert a filename to a safe format, replacing spaces and special characters.
     
     Args:
         filename (str): The filename to sanitize
         
     Returns:
-        str: A sanitized version of the filename
+        str: Sanitized filename
     """
-    # Remove any directory path
-    filename = os.path.basename(filename)
-    # Replace spaces with underscores
-    filename = filename.replace(' ', '_')
-    # Replace special characters with underscores
-    filename = re.sub(r'[^\w\-_.]', '_', filename)
-    return filename
+    # Remove special characters except for .-_
+    sanitized = re.sub(r'[^a-zA-Z0-9._-]', '_', filename)
+    return sanitized
 
 
 def find_rel_path(link_path, current_file):
     """
-    Get the relative path for HTML links using a flattened structure.
+    Get the relative path for HTML links.
     
     Args:
         link_path (str): Path to the linked file
         current_file (str): Path to the current file
         
     Returns:
-        str: The relative path for the HTML link
+        str: Relative path suitable for HTML links
     """
-    # For our flattened structure, we just need the filename
-    return "notes/" + sanitize_filename(os.path.basename(link_path))
+    # We're always placing files in the notes directory with a flattened structure
+    # So we just need the basename
+    basename = os.path.basename(link_path)
+    sanitized_name = sanitize_filename(basename)
+    
+    # HTML links are always relative to the notes directory
+    rel_path = os.path.join("notes", sanitized_name)
+    return rel_path
+
+
+def find_file_in_directory(filename, base_directory):
+    """
+    Find a file by name, first in the given directory, then recursively through subdirectories.
+    
+    Args:
+        filename (str): The name of the file to find
+        base_directory (str): The directory to start searching from
+        
+    Returns:
+        str or None: The full path to the found file, or None if not found
+    """
+    # Try to find the file in the given directory first
+    potential_path = os.path.join(base_directory, filename)
+    potential_path = os.path.normpath(potential_path)
+    
+    if os.path.exists(potential_path):
+        return potential_path
+        
+    # If not found, search recursively
+    for root, _, files in os.walk(base_directory):
+        for file in files:
+            if file == filename:
+                file_path = os.path.join(root, file)
+                return os.path.normpath(file_path)
+                
+    # File not found
+    return None
 
 
 def resolve_path(file_path):
