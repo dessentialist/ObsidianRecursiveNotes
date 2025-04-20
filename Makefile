@@ -12,7 +12,7 @@ help:
 
 # Run tests
 test:
-	python -m pytest test_exportMdFileToHtml.py -v
+	python -m pytest test_file_counting.py test_gui_interface.py -v
 
 # Run linting
 lint:
