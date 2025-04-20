@@ -1,0 +1,100 @@
+---
+description: Apply these rules when creating the project
+globs:
+alwaysApply: true
+---
+## Project Overview
+
+*   **Type:** Python Tool (CLI & GUI Exporter)
+*   **Description:** The Obsidian Recursive Notes Exporter is a Python tool designed to export Obsidian notes and their linked files (Markdown and images) recursively while preserving the connections between them.
+*   **Primary Goal:** Export Obsidian notes with their linked files (including images) recursively, supporting both a GUI (Tkinter) and a CLI interface, and ensuring robust handling of circular references and customizable recursion depth.
+
+## Project Structure
+
+### Framework-Specific Routing
+
+*   **Directory Rules:**
+
+    *   Python 3.6+: Organize the project as a modular Python package with clear separation between CLI and GUI interface components.
+    *   Example 1: CLI mode → Use `obsidian_recursive_notes/__main__.py` as the entry point for command-line interaction.
+    *   Example 2: GUI mode (Tkinter) → Isolate GUI components in `gui_interface.py` and related modules.
+
+### Core Directories
+
+*   **Versioned Structure:**
+
+    *   `obsidian_recursive_notes/`: Contains core modules such as `path_utils.py` for path resolution and sanitization, and `file_operations.py` for recursive file processing.
+    *   `tests/`: Contains unit tests implemented with `pytest` and `pytest-cov` for testing the functionality of each module.
+    *   `export/notes/`: The output directory structure where exported files (Markdown and images) are organized.
+
+### Key Files
+
+*   **Stack-Versioned Patterns:**
+
+    *   `setup.py`: Packaging configuration for setuptools.
+    *   `obsidian_recursive_notes/__main__.py`: Entry point for CLI execution.
+    *   `gui_interface.py`: Contains the Tkinter-based GUI implementation.
+    *   `path_utils.py` & `file_operations.py`: Core modules for file/path operations and recursive export logic.
+
+## Tech Stack Rules
+
+*   **Version Enforcement:**
+
+    *   `python@3.6+`: Requires Python version 3.6 or above, ensuring compatibility with all used libraries.
+    *   Example: Tkinter is bundled with Python, and testing is performed with `pytest` which is compatible across versions.
+
+## PRD Compliance
+
+*   **Non-Negotiable:**
+
+    *   "Exports all Obsidian notes recursively preserving metadata and links": Must ensure that all linked Markdown files and images are correctly exported, maintaining their connectivity.
+    *   "Handles circular references gracefully": The exporter must account for circular references to prevent infinite loops during recursive traversal.
+
+## App Flow Integration
+
+*   **Stack-Aligned Flow:**
+
+    *   Example: The CLI and GUI flows both initiate from `obsidian_recursive_notes/__main__.py`, which coordinates with `file_operations.py` for processing files. The GUI flow further integrates with `gui_interface.py` to provide a responsive user interface for file selection, recursion depth input, and progress tracking.
+
+## Best Practices
+
+*   Python
+    *   Use virtual environments (e.g., venv or conda) to isolate dependencies.
+    *   Adhere to PEP8 coding standards to maintain readability and consistency.
+    *   Implement robust error handling and logging to capture file operation issues.
+    *   Write comprehensive tests using pytest to cover edge cases and ensure reliability.
+    *   Document functions and modules using clear docstrings and inline comments.
+
+*   Tkinter
+    *   Design a responsive GUI that does not block the main thread; consider background processing for long-running tasks.
+    *   Validate user inputs thoroughly to handle invalid file paths or recursion depths gracefully.
+    *   Separate the GUI logic from backend file operations to maintain a clear separation of concerns.
+
+## Rules
+
+*   Derive folder/file patterns **directly** from techStackDoc versions.
+*   If using the CLI mode: Organize code under `obsidian_recursive_notes/__main__.py` with supporting modules in the package.
+*   If using the GUI mode: Ensure the GUI is isolated in `gui_interface.py` and leverages backend modules for processing.
+*   Never mix workflow patterns (e.g., do not intermingle CLI argument parsing with GUI callbacks in the same module).
+
+## Rules Metrics
+
+Before starting the project development, create a metrics file in the root of the project called
+
+`cursor_metrics.md`.
+
+### Instructions:
+
+*   Each time a cursor rule is used as context, update `cursor_metrics.md`.
+
+*   Use the following format for `cursor_metrics.md:`
+
+# Rules Metrics
+
+## Usage
+
+The number of times rules is used as context
+
+    *   rule-name.mdc: 5
+    *   another-rule.mdc: 2
+    *   ...other rules
